@@ -1,3 +1,4 @@
+#[derive(Debug, PartialEq)]
 pub enum Token {
     Literal(String),
     Illegal,
@@ -42,8 +43,11 @@ impl From<char> for Token {
 
 #[cfg(test)]
 mod test {
+    use crate::lexer::Lexer;
+
     use super::Token;
 
+    #[test]
     fn test_next_token() {
         let input = "=+(){},;";
 
@@ -57,5 +61,12 @@ mod test {
             Token::Comma,
             Token::Semicolon,
         ];
+
+        let mut lexer = Lexer::new(input);
+        for test in tests {
+            let token = lexer.next_token();
+
+            assert_eq!(token, Some(test));
+        }
     }
 }
