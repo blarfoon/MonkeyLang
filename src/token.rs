@@ -1,7 +1,5 @@
 #[derive(Debug, PartialEq)]
 pub enum Token {
-    Literal(String),
-
     Letter,
     Underscore,
 
@@ -9,11 +7,17 @@ pub enum Token {
 
     // Identifiers + literals
     Ident(String),
-    Int,
+    Int(String),
 
     // Operators
     Assign,
     Plus,
+    Minus,
+    Bang,
+    Asterisk,
+    Slash,
+    LessThan,
+    GreaterThan,
 
     // Delimiters
     Comma,
@@ -29,27 +33,12 @@ pub enum Token {
     Let,
 }
 
-impl From<&str> for Token {
-    fn from(value: &str) -> Self {
-        match value {
-            "=" => Token::Assign,
-            ";" => Token::Semicolon,
-            "(" => Token::LParen,
-            ")" => Token::RParen,
-            "," => Token::Comma,
-            "+" => Token::Plus,
-            "{" => Token::LBrace,
-            "}" => Token::RBrace,
+impl Token {
+    pub fn lookup_ident(ident: &str) -> Token {
+        match ident {
             "fn" => Token::Function,
             "let" => Token::Let,
-            _ if value.parse::<i32>().is_ok() => Token::Int,
-            _ if value.len() == 1 && value.chars().next().map_or(false, |c| c.is_alphabetic()) => {
-                Token::Letter
-            }
-            _ if value.len() == 1 && value.chars().next().map_or(false, |c| c == '_') => {
-                Token::Underscore
-            }
-            _ => Token::Illegal,
+            _ => Token::Ident(ident.to_string()),
         }
     }
 }
@@ -78,7 +67,7 @@ mod test {
         let mut lexer = Lexer::new(input);
         for test in tests {
             let token = lexer.next_token();
-
+            println!("{:?} - {:?}", token, test);
             assert_eq!(token, Some(test));
         }
     }
@@ -92,18 +81,20 @@ mod test {
             x + y;
         };
         let result = add(five, ten);
+        !-/*5;
+        5 < 10 > 5;
     "#;
 
         let tests = vec![
             Token::Let,
             Token::Ident("five".to_string()),
             Token::Assign,
-            Token::Int,
+            Token::Int("5".to_string()),
             Token::Semicolon,
             Token::Let,
             Token::Ident("ten".to_string()),
             Token::Assign,
-            Token::Int,
+            Token::Int("10".to_string()),
             Token::Semicolon,
             Token::Let,
             Token::Ident("add".to_string()),
@@ -131,11 +122,23 @@ mod test {
             Token::Ident("ten".to_string()),
             Token::RParen,
             Token::Semicolon,
+            Token::Bang,
+            Token::Minus,
+            Token::Slash,
+            Token::Asterisk,
+            Token::Int("5".to_string()),
+            Token::Semicolon,
+            Token::Int("5".to_string()),
+            Token::LessThan,
+            Token::Int("10".to_string()),
+            Token::GreaterThan,
+            Token::Int("5".to_string()),
         ];
 
         let mut lexer = Lexer::new(input);
         for test in tests {
             let token = lexer.next_token();
+            println!("{:?} - {:?}", token, test);
             assert_eq!(token, Some(test));
         }
     }
@@ -156,6 +159,8 @@ mod bench {
                 x + y;
             };
             let result = add(five, ten);
+            !-/*5;
+            5 < 10 > 5;
         "#;
 
         b.iter(|| {
