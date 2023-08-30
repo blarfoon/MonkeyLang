@@ -104,6 +104,14 @@ impl Lexer {
         };
 
         let res = match ch {
+            '=' if next_ch == &Some('=') => {
+                self.read_char();
+                Token::Eq
+            }
+            '!' if next_ch == &Some('=') => {
+                self.read_char();
+                Token::NotEq
+            }
             '=' => Token::Assign,
             ';' => Token::Semicolon,
             '(' => Token::LParen,

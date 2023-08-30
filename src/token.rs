@@ -31,6 +31,14 @@ pub enum Token {
     // Keywords
     Function,
     Let,
+    True,
+    False,
+    If,
+    Else,
+    Return,
+
+    Eq,
+    NotEq,
 }
 
 impl Token {
@@ -38,6 +46,11 @@ impl Token {
         match ident {
             "fn" => Token::Function,
             "let" => Token::Let,
+            "true" => Token::True,
+            "false" => Token::False,
+            "if" => Token::If,
+            "else" => Token::Else,
+            "return" => Token::Return,
             _ => Token::Ident(ident.to_string()),
         }
     }
@@ -83,6 +96,16 @@ mod test {
         let result = add(five, ten);
         !-/*5;
         5 < 10 > 5;
+
+        if (5 < 10) {
+            return true;
+        } else {
+            return false;
+        }
+
+
+        10 == 10;
+        10 != 9;
     "#;
 
         let tests = vec![
@@ -133,6 +156,32 @@ mod test {
             Token::Int("10".to_string()),
             Token::GreaterThan,
             Token::Int("5".to_string()),
+            Token::Semicolon,
+            Token::If,
+            Token::LParen,
+            Token::Int("5".to_string()),
+            Token::LessThan,
+            Token::Int("10".to_string()),
+            Token::RParen,
+            Token::LBrace,
+            Token::Return,
+            Token::True,
+            Token::Semicolon,
+            Token::RBrace,
+            Token::Else,
+            Token::LBrace,
+            Token::Return,
+            Token::False,
+            Token::Semicolon,
+            Token::RBrace,
+            Token::Int("10".to_string()),
+            Token::Eq,
+            Token::Int("10".to_string()),
+            Token::Semicolon,
+            Token::Int("10".to_string()),
+            Token::NotEq,
+            Token::Int("9".to_string()),
+            Token::Semicolon,
         ];
 
         let mut lexer = Lexer::new(input);
